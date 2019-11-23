@@ -2,6 +2,7 @@ import numpy as np
 
 from sklearn.base import BaseEstimator, TransformerMixin
 from sklearn.utils.validation import check_X_y, check_array, check_is_fitted
+
 from .calculators import prepare_weights, calc_center_of_mass, transform_from_cartesian_to_spherical
 
 
@@ -11,6 +12,7 @@ class CenterOfMassTransformer(BaseEstimator, TransformerMixin):
 
     def fit(self, X, y=None):
         X = check_array(X, accept_sparse=True)
+        # TODO: Add checking if n_components < len(X.T)
 
         weights = prepare_weights(y) if y is not None else np.ones(X.shape[1])
 
@@ -22,9 +24,9 @@ class CenterOfMassTransformer(BaseEstimator, TransformerMixin):
         check_is_fitted(self, 'cm_')
         X = check_array(X, accept_sparse=True)
 
-        X_ex = X - self.cm_
+        X = X - self.cm_
 
-        for _ in range(X.shape[1] - self.n_components):
-            X_ex = transform_from_cartesian_to_spherical(X_ex)[:, 1:]
+        for _ in range(len(X.T) - self.n_components):
+            X = transform_from_cartesian_to_spherical(X)[:, 1:]
 
-        return X_ex
+        return X
